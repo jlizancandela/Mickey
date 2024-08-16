@@ -1,7 +1,8 @@
-import PromptSync from "prompt-sync";
 import { board, gameState, initialBoard } from "./types";
+import * as readline from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 
-const prompt = PromptSync();
+const rl = readline.createInterface({ input, output });
 
 const dificulty = 0.4;
 
@@ -120,34 +121,37 @@ export const printBoard = (board: board) => {
 
 const game = new Game();
 printBoard(game.getBoard());
+(async () => {
+  // Main game loop
+  while (game.getGameState() === "playing") {
+    const movimiento = await rl.question(
+      "¿Qué movimiento deseas realizar? (Arriba: 1, Abajo: 2, Izquierda: 3, Derecha: 4, Reiniciar: 5):"
+    );
 
-// Main game loop
-while (game.getGameState() === "playing") {
-  const movimiento = prompt(
-    "¿Qué movimiento deseas realizar? (Arriba: 1, Abajo: 2, Izquierda: 3, Derecha: 4, Reiniciar: 5):"
-  );
+    switch (movimiento) {
+      case "1":
+        game.move(-1, 0);
+        break;
+      case "2":
+        game.move(1, 0);
+        break;
+      case "3":
+        game.move(0, -1);
+        break;
+      case "4":
+        game.move(0, 1);
+        break;
+      case "5":
+        game.reset();
+        break;
+      default:
+        game.setMessage("Movimiento inválido");
+        game.setGameState("lost");
+        break;
+    }
 
-  switch (movimiento) {
-    case "1":
-      game.move(-1, 0);
-      break;
-    case "2":
-      game.move(1, 0);
-      break;
-    case "3":
-      game.move(0, -1);
-      break;
-    case "4":
-      game.move(0, 1);
-      break;
-    case "5":
-      game.reset();
-      break;
-    default:
-      game.setMessage("Movimiento inválido");
-      game.setGameState("lost");
-      break;
+    printBoard(game.getBoard());
   }
 
-  printBoard(game.getBoard());
-}
+  rl.close();
+})();
